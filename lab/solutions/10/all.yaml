@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lesson-10
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: lesson-10
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: GREETING
+              value: web
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: lesson-10
+spec:
+  selector:
+    app: web
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: lesson-10
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: GREETING
+              value: api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  namespace: lesson-10
+spec:
+  selector:
+    app: api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shop
+  namespace: lesson-10
+  annotations:
+    # Keep plain HTTP working so the lesson can test both schemes. Without this a `tls`
+    # block makes ingress-nginx 308-redirect every HTTP request to HTTPS.
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - shop.localtest.me
+      secretName: shop-tls
+  rules:
+    - host: shop.localtest.me
+      http:
+        paths:
+          # Longest match wins, so /api must be listed - order in the file does not matter,
+          # but having /  as Prefix does not swallow /api.
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api
+                port:
+                  name: http
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port:
+                  name: http

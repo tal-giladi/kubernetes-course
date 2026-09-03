@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello
+  template:
+    metadata:
+      labels:
+        app: hello
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            # Written as the plain generator name. Kustomize rewrites every reference to
+            # the hashed name for you - that rewriting is the feature.
+            name: app-config
+      containers:
+        - name: hello
+          image: hello:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: GREETING
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: GREETING
+          volumeMounts:
+            - name: config
+              mountPath: /etc/hello

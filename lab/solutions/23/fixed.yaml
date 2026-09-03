@@ -1,0 +1,123 @@
+# The same four workloads, corrected. One fix each.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lesson-23
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-a
+  namespace: lesson-23
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: app-a } }
+  template:
+    metadata:
+      labels: { app: app-a }
+    spec:
+      containers:
+        - name: hello
+          # FIX: the tag was hello:1.4.0, which was never built or `kind load`ed.
+          # Symptom: ErrImagePull -> ImagePullBackOff, event "manifest unknown" / not found.
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8080 }]
+          resources: { requests: { cpu: 20m, memory: 64Mi } }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-b
+  namespace: lesson-23
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: app-b } }
+  template:
+    metadata:
+      labels: { app: app-b }
+    spec:
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8080 }]
+          resources: { requests: { cpu: 20m, memory: 64Mi } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-b
+  namespace: lesson-23
+spec:
+  selector:
+    # FIX: was `app: appb` - one missing hyphen, so the selector matched nothing, the
+    # EndpointSlice was empty, and calls to the Service hung. Nothing anywhere reported
+    # an error: a Service with a wrong selector is a perfectly healthy Service.
+    app: app-b
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-c-config
+  namespace: lesson-23
+data:
+  # FIX (either half works): the ConfigMap had `greeting` while the container asked for
+  # `GREETING`. Keys are case-sensitive. Fixed here by renaming the key to match.
+  GREETING: hello-from-configmap
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-c
+  namespace: lesson-23
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: app-c } }
+  template:
+    metadata:
+      labels: { app: app-c }
+    spec:
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8080 }]
+          env:
+            - name: GREETING
+              valueFrom:
+                configMapKeyRef:
+                  name: app-c-config
+                  key: GREETING
+          # Symptom was CreateContainerConfigError: the container never started, so there
+          # were no logs at all - only the Pod's events named the missing key.
+          resources: { requests: { cpu: 20m, memory: 64Mi } }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-d
+  namespace: lesson-23
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: app-d } }
+  template:
+    metadata:
+      labels: { app: app-d }
+    spec:
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8080 }]
+          resources:
+            requests:
+              # FIX: was cpu: "24" - twenty-four cores, which no node has, so the Pod sat
+              # Pending with FailedScheduling / Insufficient cpu. Scheduling looks at
+              # requests, not usage: the cluster was idle and still had no room.
+              cpu: 100m
+              memory: 64Mi

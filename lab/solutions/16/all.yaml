@@ -1,0 +1,124 @@
+# Before applying:
+#   kubectl label node k8s-lab-worker disktype=ssd
+#   kubectl taint node k8s-lab-worker2 lab=demo:NoSchedule
+# After the checker passes, put the node back:
+#   kubectl taint node k8s-lab-worker2 lab=demo:NoSchedule-
+#   kubectl label node k8s-lab-worker disktype-
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lesson-16
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pinned
+  namespace: lesson-16
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: pinned } }
+  template:
+    metadata:
+      labels: { app: pinned }
+    spec:
+      nodeSelector:
+        disktype: ssd
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          resources: { requests: { cpu: 10m, memory: 32Mi } }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spread
+  namespace: lesson-16
+spec:
+  replicas: 4
+  selector: { matchLabels: { app: spread } }
+  template:
+    metadata:
+      labels: { app: spread }
+    spec:
+      # Both workers must be usable for a spread to mean anything, and step 4 taints
+      # worker2 - so this workload tolerates that taint. The control-plane node stays
+      # excluded by its own taint, which is correct.
+      tolerations:
+        - key: lab
+          operator: Equal
+          value: demo
+          effect: NoSchedule
+      # "Balance across nodes, and if you cannot, schedule anyway." Says what you mean,
+      # and degrades gracefully - unlike required anti-affinity.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels: { app: spread }
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          resources: { requests: { cpu: 10m, memory: 32Mi } }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apart
+  namespace: lesson-16
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: apart } }
+  template:
+    metadata:
+      labels: { app: apart }
+    spec:
+      # Same reason as `spread`: with worker2 tainted and the control plane tainted, a
+      # hard "never two on one node" rule would have exactly one node to work with.
+      tolerations:
+        - key: lab
+          operator: Equal
+          value: demo
+          effect: NoSchedule
+      affinity:
+        podAntiAffinity:
+          # Hard rule: never two of these on one node. Scale past the node count and the
+          # extras stay Pending forever.
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels: { app: apart }
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          resources: { requests: { cpu: 10m, memory: 32Mi } }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tolerant
+  namespace: lesson-16
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: tolerant } }
+  template:
+    metadata:
+      labels: { app: tolerant }
+    spec:
+      # The toleration only removes the barrier. The nodeSelector is what actually
+      # chooses the node - tolerating is not the same as preferring.
+      tolerations:
+        - key: lab
+          operator: Equal
+          value: demo
+          effect: NoSchedule
+      nodeSelector:
+        kubernetes.io/hostname: k8s-lab-worker2
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          resources: { requests: { cpu: 10m, memory: 32Mi } }

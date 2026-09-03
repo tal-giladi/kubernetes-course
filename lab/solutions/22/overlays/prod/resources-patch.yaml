@@ -1,0 +1,18 @@
+# A strategic-merge patch: only the fields named here change. Lists of containers are
+# merged by the `name` key, which is why this does not wipe the image or the ports.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+spec:
+  template:
+    spec:
+      containers:
+        - name: hello
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi

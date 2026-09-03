@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lesson-15
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guaranteed
+  namespace: lesson-15
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: guaranteed } }
+  template:
+    metadata:
+      labels: { app: guaranteed }
+    spec:
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8080 }]
+          # requests == limits on both resources -> QoS class Guaranteed, evicted last.
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits:   { cpu: 100m, memory: 128Mi }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: burstable
+  namespace: lesson-15
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: burstable } }
+  template:
+    metadata:
+      labels: { app: burstable }
+    spec:
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8080 }]
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits:   { cpu: 500m, memory: 256Mi }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: besteffort
+  namespace: lesson-15
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: besteffort } }
+  template:
+    metadata:
+      labels: { app: besteffort }
+    spec:
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8080 }]
+          # No resources at all -> BestEffort -> first in line to be evicted.
+---
+# Allocates without bound, hits its own 32Mi ceiling, and is killed by the kernel.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hungry
+  namespace: lesson-15
+spec:
+  containers:
+    - name: hog
+      image: busybox:1.37
+      command: ["sh", "-c", "tail /dev/zero"]
+      resources:
+        requests: { memory: 16Mi }
+        limits:   { memory: 32Mi }
+---
+# Asks for a hundred cores. Stays Pending forever, and says exactly why.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: toobig
+  namespace: lesson-15
+spec:
+  containers:
+    - name: hello
+      image: hello:1.1.0
+      imagePullPolicy: IfNotPresent
+      resources:
+        requests: { cpu: "100" }

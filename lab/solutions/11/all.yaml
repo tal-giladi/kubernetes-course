@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lesson-11
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: lesson-11
+data:
+  GREETING: shalom
+  app.conf: |
+    timeout = 30
+    retries = 3
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-creds
+  namespace: lesson-11
+type: Opaque
+# stringData is plain text on the way in; the API server encodes it. Never hand-encode
+# into `data:` - it is the easiest way to ship a password with a stray newline in it.
+stringData:
+  DB_PASSWORD: hunter2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+  namespace: lesson-11
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello
+  template:
+    metadata:
+      labels:
+        app: hello
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: app-config
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            # Bound at container start. Changing the ConfigMap does NOT change this.
+            - name: GREETING
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: GREETING
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-creds
+                  key: DB_PASSWORD
+          volumeMounts:
+            # Mounted as files, and these DO refresh - within about a minute.
+            - name: config
+              mountPath: /etc/hello
+              readOnly: true

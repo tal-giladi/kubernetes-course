@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lesson-13
+---
+# Headless: no virtual IP, one DNS record per Pod. This is what gives db-0, db-1, db-2
+# their stable names - the StatefulSet cannot provide identity without it.
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: lesson-13
+spec:
+  clusterIP: None
+  selector:
+    app: db
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db
+  namespace: lesson-13
+spec:
+  serviceName: db
+  replicas: 3
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: DATA_DIR
+              value: /data
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  # One PVC per Pod: data-db-0, data-db-1, data-db-2. Immutable after creation, and NOT
+  # deleted when you scale down.
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 1Gi

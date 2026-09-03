@@ -1,0 +1,25 @@
+01	01	01	The mental model: from Docker to Kubernetes
+02	01	02	kubectl and the object model
+03	01	03	Pods: the atom
+04	02	01	Deployments and ReplicaSets
+05	02	02	Rollouts, rollbacks and rollout safety
+06	02	03	Your own image: build, load, deploy
+07	02	04	DaemonSets, Jobs and CronJobs
+08	03	01	Services and endpoints
+09	03	02	DNS, headless Services and kube-proxy
+10	03	03	Ingress and TLS
+11	04	01	ConfigMaps and Secrets
+12	04	02	Volumes, PVs, PVCs and StorageClasses
+13	04	03	StatefulSets
+14	05	01	Probes: liveness, readiness, startup
+15	05	02	Resources, QoS and eviction
+16	05	03	Scheduling and placement
+17	05	04	Autoscaling and PodDisruptionBudgets
+18	06	01	Namespaces, ResourceQuota and LimitRange
+19	06	02	RBAC and ServiceAccounts
+20	06	03	SecurityContext, Pod Security Admission and NetworkPolicy
+21	07	01	Helm
+22	07	02	Kustomize
+23	08	01	The debugging playbook
+24	08	02	CRDs, controllers and operators
+25	08	03	Capstone: ship a multi-tier application

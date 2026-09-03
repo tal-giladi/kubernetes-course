@@ -1,0 +1,139 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lesson-20
+  labels:
+    # Enforcement is a namespace label. Everything below exists to satisfy it.
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+  namespace: lesson-20
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: hello } }
+  template:
+    metadata:
+      labels: { app: hello }
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1654          # the `app` user in the .NET runtime images
+        runAsGroup: 1654
+        fsGroup: 1654
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        # readOnlyRootFilesystem means the runtime needs somewhere to put temp files.
+        - name: tmp
+          emptyDir: {}
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8080 }]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests: { cpu: 20m, memory: 64Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello
+  namespace: lesson-20
+spec:
+  selector: { app: hello }
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-allowed
+  namespace: lesson-20
+spec:
+  replicas: 1
+  selector: { matchLabels: { role: client } }
+  template:
+    metadata:
+      labels: { role: client }
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: client
+          image: busybox:1.37
+          command: ["sh", "-c", "sleep 3600"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ["ALL"] }
+          resources:
+            requests: { cpu: 10m, memory: 16Mi }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-denied
+  namespace: lesson-20
+spec:
+  replicas: 1
+  selector: { matchLabels: { role: other } }
+  template:
+    metadata:
+      labels: { role: other }
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: client
+          image: busybox:1.37
+          command: ["sh", "-c", "sleep 3600"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ["ALL"] }
+          resources:
+            requests: { cpu: 10m, memory: 16Mi }
+---
+# Selects every Pod in the namespace for Ingress, and lists no rules -> deny everything in.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: lesson-20
+spec:
+  podSelector: {}
+  policyTypes: [Ingress]
+---
+# ...then add back exactly one source. Policies are additive allow-lists.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-client
+  namespace: lesson-20
+spec:
+  podSelector:
+    matchLabels: { app: hello }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: { role: client }
+      ports:
+        - protocol: TCP
+          port: 8080

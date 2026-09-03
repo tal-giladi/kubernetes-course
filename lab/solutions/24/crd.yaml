@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lesson-24
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  # Must be exactly <plural>.<group>. The API server rejects anything else.
+  name: greetings.k8slab.dev
+spec:
+  group: k8slab.dev
+  scope: Namespaced
+  names:
+    plural: greetings
+    singular: greeting
+    kind: Greeting
+    shortNames: [gr]
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        # Splits spec and status into separate endpoints, so a controller writing status
+        # cannot clobber a user's concurrent spec edit.
+        status: {}
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required: [message]
+              properties:
+                message:
+                  type: string
+                  maxLength: 40
+                  description: What the greeting should say.
+                replicas:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                  default: 1
+                  description: How many copies a real controller would run.
+            status:
+              type: object
+              properties:
+                configMapName:
+                  type: string
+                observedGeneration:
+                  type: integer
+      additionalPrinterColumns:
+        - name: Message
+          type: string
+          jsonPath: .spec.message
+        - name: ConfigMap
+          type: string
+          jsonPath: .status.configMapName
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp

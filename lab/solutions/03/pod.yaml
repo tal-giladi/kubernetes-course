@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web
+  namespace: lesson-03
+  labels:
+    app: web
+spec:
+  volumes:
+    - name: html
+      emptyDir: {}
+  initContainers:
+    - name: seed
+      image: busybox:1.37
+      command: ["sh", "-c", "echo 'hello from init' > /work/index.html"]
+      volumeMounts:
+        - name: html
+          mountPath: /work
+  containers:
+    - name: nginx
+      image: nginx:1.29-alpine
+      ports:
+        - containerPort: 80
+      volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html

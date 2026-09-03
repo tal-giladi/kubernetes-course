@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: lesson-22
+namePrefix: prod-
+
+resources:
+  - ../../base
+
+labels:
+  - pairs:
+      env: prod
+    includeSelectors: false   # true would rewrite the Deployment's immutable selector
+
+images:
+  - name: hello
+    newTag: "1.1.0"
+
+replicas:
+  - name: hello
+    count: 3
+
+patches:
+  - path: resources-patch.yaml
+
+# Overrides the base generator's literals. Same generator name, different content, so the
+# hash - and therefore the ConfigMap name and the Pod template - differ from dev's.
+configMapGenerator:
+  - name: app-config
+    behavior: merge
+    literals:
+      - GREETING=shalom-prod

@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - deployment.yaml
+  - service.yaml
+
+# The generator hashes its content into the name (app-config-9f8b2c...), so changing a
+# value produces a NEW ConfigMap name, which changes the Pod template, which triggers a
+# rolling update. That is the answer to "my config changed and nothing restarted".
+configMapGenerator:
+  - name: app-config
+    literals:
+      - GREETING=hello
+      - app.conf=timeout=30

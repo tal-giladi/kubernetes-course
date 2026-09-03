@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lesson-14
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+  namespace: lesson-14
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello
+  template:
+    metadata:
+      labels:
+        app: hello
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: READY_AFTER_SECONDS
+              value: "20"
+          lifecycle:
+            preStop:
+              # Give the endpoint removal time to propagate before the process starts
+              # refusing connections. Without this, deletes drop a few in-flight requests.
+              exec:
+                command: ["sh", "-c", "sleep 5"]
+          startupProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 5
+            failureThreshold: 30      # 150s of boot budget, then liveness takes over
+          readinessProbe:
+            httpGet: { path: /readyz, port: http }
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 10
+            failureThreshold: 3
+---
+# Deliberately unhealthy: answers /healthz for 20s, then 500s forever. Watch RESTARTS.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flaky
+  namespace: lesson-14
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flaky
+  template:
+    metadata:
+      labels:
+        app: flaky
+    spec:
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: FAIL_LIVENESS_AFTER_SECONDS
+              value: "20"
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 5
+            failureThreshold: 2

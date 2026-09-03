@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lesson-17
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+  namespace: lesson-17
+spec:
+  # No `replicas` field on purpose: the HPA owns that number now. Leaving it here means
+  # every `kubectl apply` fights the autoscaler.
+  selector: { matchLabels: { app: hello } }
+  template:
+    metadata:
+      labels: { app: hello }
+    spec:
+      containers:
+        - name: hello
+          image: hello:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports: [{ name: http, containerPort: 8080 }]
+          resources:
+            # The CPU request is what "50% utilisation" is a percentage OF. Without it the
+            # HPA reports <unknown> forever.
+            requests: { cpu: 100m, memory: 64Mi }
+            limits:   { cpu: 300m, memory: 256Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello
+  namespace: lesson-17
+spec:
+  selector: { app: hello }
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hello
+  namespace: lesson-17
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: hello
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+    scaleDown:
+      stabilizationWindowSeconds: 300
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: hello
+  namespace: lesson-17
+spec:
+  # Voluntary disruption only - a drain will wait rather than take the last Pod.
+  # `kubectl delete pod` ignores this entirely.
+  minAvailable: 1
+  selector:
+    matchLabels: { app: hello }
