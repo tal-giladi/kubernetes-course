@@ -16,7 +16,8 @@ through a real Ingress.
 
 ## What makes it different from the documentation
 
-1. **It is graded.** `bash lab/lab.sh check NN` inspects real objects, real endpoints and
+1. **It is graded.** `bash lab/lab.sh check NN` - `.\lab\lab.ps1 check NN` in PowerShell -
+   inspects real objects, real endpoints and
    real traffic. A lesson is complete when the cluster is in the required state, not when
    the page has been read.
 2. **Three nodes, not one.** Scheduling, anti-affinity, topology spread, DaemonSet

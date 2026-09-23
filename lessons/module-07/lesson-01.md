@@ -1,5 +1,7 @@
 # 21 - Helm
 
+*Module 07 - Packaging and delivery, lesson 1 of 2. Exercise 21 of 25.*
+
 By now you have written the same Deployment fifteen times with three fields different.
 Twelve environments times four services is a lot of copy-paste, and copy-paste is where
 drift lives. **Helm** is templated YAML plus a release lifecycle: one chart, many values,

@@ -1,5 +1,7 @@
 # 17 - Autoscaling and PodDisruptionBudgets
 
+*Module 05 - Reliability, lesson 4 of 4. Exercise 17 of 25.*
+
 Two ways the replica count changes without you: something scales it up because load
 demands it, and something scales it *down* because a node is going away. The first is the
 HorizontalPodAutoscaler. The second is voluntary disruption, and a PodDisruptionBudget is

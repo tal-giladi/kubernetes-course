@@ -1,5 +1,7 @@
 # 18 - Namespaces, ResourceQuota and LimitRange
 
+*Module 06 - Security and multi-tenancy, lesson 1 of 3. Exercise 18 of 25.*
+
 A namespace on its own is only a naming scope. It becomes a *tenancy* boundary when you
 attach the three things that actually constrain it: a quota on what it may consume, a
 default for what its Pods ask for, and RBAC on who may touch it (lesson 19).

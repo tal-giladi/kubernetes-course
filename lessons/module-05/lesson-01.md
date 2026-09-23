@@ -1,5 +1,7 @@
 # 14 - Probes: liveness, readiness, startup
 
+*Module 05 - Reliability, lesson 1 of 4. Exercise 14 of 25.*
+
 Kubernetes has no idea what "healthy" means for your application. Without probes its only
 signal is "did the process exit", which is the weakest possible definition. Probes are how
 you tell it something better - and they are what make Services and rolling updates safe.

@@ -55,7 +55,8 @@ written by the container runtime, and vanish with the Pod.
 **4.** It deletes `lesson-03` in **prod-aks**, because that is the current context, and it
 is a valid command that will succeed. You should have checked
 `kubectl config current-context` first. Two ways to make it structurally impossible:
-(a) `source lab/env.sh` so `KUBECONFIG` points at a file containing only the lab cluster;
+(a) `source lab/env.sh` (PowerShell: `. .\lab\env.ps1`) so `KUBECONFIG` points at a file
+containing only the lab cluster;
 (b) pass `--context kind-k8s-lab` on every command, which is what the course's grader does.
 
 **5.** It is a **static Pod**. The kubelet reads its manifest from

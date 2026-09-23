@@ -1,5 +1,7 @@
 # 02 - kubectl and the object model
 
+*Module 01 - Foundations, lesson 2 of 3. Exercise 02 of 25.*
+
 Lesson 01 said the API server *is* the system. This lesson is about talking to it well,
 because for the next twenty-three lessons `kubectl` is your hands.
 

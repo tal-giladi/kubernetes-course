@@ -1,5 +1,7 @@
 # 06 - Your own image: build, load, deploy
 
+*Module 02 - Running workloads, lesson 3 of 4. Exercise 06 of 25.*
+
 Every lesson so far ran `nginx`. Real work runs *your* image, and the gap between
 `docker run myapp` and `kubectl apply` is where most first days go wrong. This lesson
 closes it, and gives you the application the rest of the course uses.

@@ -1,5 +1,7 @@
 # 04 - Deployments and ReplicaSets
 
+*Module 02 - Running workloads, lesson 1 of 4. Exercise 04 of 25.*
+
 You now know a Pod is mortal and never repaired. So who makes a new one? A chain of two
 controllers:
 

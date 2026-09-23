@@ -11,32 +11,41 @@ one was executed against a real cluster while the course was written.
 
 ## Start here
 
+**bash, zsh or Git Bash:**
+
 ```bash
 bash lab/lab.sh up          # create the 3-node kind cluster (~2 minutes)
 source lab/env.sh           # point THIS shell at a lab-only kubeconfig
 bash lab/lab.sh             # see where you are and what is next
 ```
 
-Then open [`lessons/module-01/lesson-01.md`](lessons/module-01/lesson-01.md), do the
-exercise at the bottom, and run:
+**PowerShell** (Windows PowerShell 5.1 or PowerShell 7 — note the leading dot on line two):
 
-```bash
-bash lab/lab.sh check 01
+```powershell
+.\lab\lab.ps1 up            # create the 3-node kind cluster (~2 minutes)
+. .\lab\env.ps1             # point THIS shell at a lab-only kubeconfig
+.\lab\lab.ps1               # see where you are and what is next
 ```
 
-`source lab/env.sh` is not optional ceremony. If you have ever run `az aks get-credentials`
-or connected to a managed cluster, that context is sitting next to the lab one and tools
-switch it behind your back. This isolates the shell to a kubeconfig containing only the lab
-cluster; the grader pins the context on every call regardless.
+Then open [`lessons/module-01/lesson-01.md`](lessons/module-01/lesson-01.md), do the
+exercise at the bottom, and run `bash lab/lab.sh check 01` — or `.\lab\lab.ps1 check 01`.
 
-| Command | What it does |
-|---|---|
-| `bash lab/lab.sh` | progress, cluster status, what is next |
-| `bash lab/lab.sh check NN` | grade exercise NN against the live cluster |
-| `bash lab/lab.sh hint NN` | a nudge, not the answer |
-| `bash lab/lab.sh solve NN` | the solution manifests |
-| `bash lab/lab.sh reset NN` | delete that exercise's namespace and start over |
-| `bash lab/cleanup.sh --all` | remove every trace of this course from the machine |
+Isolating the kubeconfig is not optional ceremony. If you have ever run
+`az aks get-credentials` or connected to a managed cluster, that context is sitting next to
+the lab one and tools switch it behind your back. This points the shell at a kubeconfig
+containing only the lab cluster; the grader pins the context on every call regardless.
+
+| bash / Git Bash | PowerShell | What it does |
+|---|---|---|
+| `bash lab/lab.sh` | `.\lab\lab.ps1` | progress, cluster status, what is next |
+| `bash lab/lab.sh check NN` | `.\lab\lab.ps1 check NN` | grade exercise NN against the live cluster |
+| `bash lab/lab.sh hint NN` | `.\lab\lab.ps1 hint NN` | a nudge, not the answer |
+| `bash lab/lab.sh solve NN` | `.\lab\lab.ps1 solve NN` | the solution manifests |
+| `bash lab/lab.sh reset NN` | `.\lab\lab.ps1 reset NN` | delete that exercise's namespace and start over |
+| `bash lab/cleanup.sh --all` | `.\lab\cleanup.ps1 -All` | remove every trace of this course from the machine |
+
+Both drivers share the same `lab/.progress` file, so you can switch shells mid-course and
+lose nothing.
 
 ---
 
@@ -44,7 +53,48 @@ cluster; the grader pins the context on every call regardless.
 
 Docker, `kubectl`, and `kind` (plus `helm` from lesson 21). Windows 11 + Docker Desktop +
 Git Bash is the environment everything was written and tested in; macOS and Linux work with
-no changes except the two Git Bash workarounds noted in lessons 10 and 25.
+no changes except the two Git Bash workarounds noted in lessons 10 and 25. PowerShell works
+too — see below.
+
+### Running the course in PowerShell
+
+Every lab command has a PowerShell twin (`lab.ps1`, `env.ps1`, `cleanup.ps1`) and both
+drivers share one progress file. Four differences are worth knowing before you start, and
+they are the only ones in the whole course:
+
+- **`source` does not exist.** PowerShell's equivalent is a leading dot: `. .\lab\env.ps1`.
+  Without it the script runs in a child process and the `KUBECONFIG` it sets dies with it.
+  `env.ps1` refuses to run without the dot rather than letting you discover this later.
+- **The 25 checkers are still bash scripts**, and stay that way — one grader, not two copies
+  that can disagree. `.\lab\lab.ps1 check NN` runs them through Git Bash, which it finds by
+  path. It deliberately ignores `bash` on your `PATH`: on Windows that is usually
+  `C:\Windows\System32\bash.exe`, the WSL launcher — a different machine, with no `kubectl`
+  on it. So Git for Windows is required even if you never open Git Bash yourself.
+- **Line continuation is a backtick, not a backslash.** Where a lesson shows
+
+      kubectl -n ingress-nginx wait --for=condition=Ready pod \
+        -l app.kubernetes.io/component=controller --timeout=180s
+
+  PowerShell wants `` ` `` at the end of the line instead of `\` (or just write it on one
+  line). Likewise a bash heredoc — `kubectl apply -f - <<'EOF' ... EOF` — becomes a
+  here-string:
+
+      @'
+      apiVersion: v1
+      kind: ConfigMap
+      ...
+      '@ | kubectl apply -f -
+
+- **`MSYS_NO_PATHCONV=1` is a Git Bash thing you do not need.** In PowerShell,
+  `openssl req -subj "/CN=shop.localtest.me"` is passed through untouched (lesson 10).
+- **Write `curl.exe`, not `curl`, on Windows PowerShell 5.1**, where `curl` is an alias for
+  `Invoke-WebRequest` and does not understand `-s`, `-H` or `-k`. PowerShell 7 dropped the
+  alias, so there `curl` is the real thing. The many `docker exec ... curl` lines in the
+  lessons run inside a container and are unaffected either way.
+
+If a `.ps1` refuses to run at all, your machine's execution policy is blocking local
+scripts: `powershell -ExecutionPolicy Bypass -File .\lab\lab.ps1 check 01`, or set it once
+for yourself with `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
 
 The cluster is **three nodes** — one control plane, two workers — because half the syllabus
 does not exist on a single node: scheduling, anti-affinity, topology spread, DaemonSet
@@ -81,9 +131,10 @@ has a 90-second blip. Describe what happens, and why it is worse than having no 
 probe."*
 
 ### Lab — `lab/`
-`lab.sh` (the grader), `cluster/kind-config.yaml`, `checks/` (25 checkers), `solutions/`,
-`apps/hello` (the course's ASP.NET application), `apps/broken` (lesson 23's four broken
-Deployments), `cleanup.sh`.
+`lab.sh` / `lab.ps1` (the grader, one per shell), `env.sh` / `env.ps1`,
+`cluster/kind-config.yaml`, `checks/` (25 checkers), `solutions/`, `apps/hello` (the
+course's ASP.NET application), `apps/broken` (lesson 23's four broken Deployments),
+`cleanup.sh` / `cleanup.ps1`.
 
 ### Assets — `assets/`
 [`kubectl-cheatsheet.md`](assets/kubectl-cheatsheet.md) and
@@ -116,6 +167,10 @@ the kubelet's projected token, Kustomize's content hash, the three-way merge in
 
 ```bash
 bash lab/cleanup.sh --all
+```
+
+```powershell
+.\lab\cleanup.ps1 -All
 ```
 
 Deletes the cluster and its three containers, every image the course pulled or built, the

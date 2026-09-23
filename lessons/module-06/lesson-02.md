@@ -1,5 +1,7 @@
 # 19 - RBAC and ServiceAccounts
 
+*Module 06 - Security and multi-tenancy, lesson 2 of 3. Exercise 19 of 25.*
+
 Every request to the API server is **authenticated** (who are you?) and then
 **authorized** (may you do this?). RBAC is the authorization half, and it is four objects
 that fit together in a way that is much simpler than its reputation.

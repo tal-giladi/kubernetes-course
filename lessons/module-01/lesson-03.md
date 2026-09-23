@@ -1,5 +1,7 @@
 # 03 - Pods: the atom (and why you'll rarely write one)
 
+*Module 01 - Foundations, lesson 3 of 3. Exercise 03 of 25.*
+
 A **Pod** is the smallest thing Kubernetes schedules. It is *one or more* containers that:
 
   - are always placed on the **same node**,

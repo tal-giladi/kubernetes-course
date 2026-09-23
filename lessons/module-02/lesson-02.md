@@ -1,5 +1,7 @@
 # 05 - Rollouts, rollbacks and rollout safety
 
+*Module 02 - Running workloads, lesson 2 of 4. Exercise 05 of 25.*
+
 Lesson 04 ended with a bare ReplicaSet that changed its template and left the running Pods
 on the old image. A Deployment fixes that by owning a *sequence* of ReplicaSets and moving
 replicas between them under control. This lesson is that mechanism, and how to keep it

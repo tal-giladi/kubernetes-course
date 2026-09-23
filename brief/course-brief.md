@@ -52,9 +52,12 @@ curriculum; the YAML is just how you fix them.
 ## Constraints the design had to respect
 
   - **Windows 11 + Docker Desktop + Git Bash.** Every command in the course was run there,
-    including the ones that need Git Bash workarounds (`//CN=` for openssl).
+    including the ones that need Git Bash workarounds (`//CN=` for openssl). PowerShell is
+    supported as a first-class second shell: `lab.ps1`, `env.ps1` and `cleanup.ps1` mirror
+    the bash drivers and share their progress file, while the 25 checkers stay bash and are
+    run through Git Bash so there is only ever one grader.
   - **The learner has a production AKS cluster in the same kubeconfig.** Lesson 01
-    therefore starts with `source lab/env.sh`, which isolates the shell to a lab-only
+    therefore starts with `source lab/env.sh` (or `. .\lab\env.ps1`), which isolates the shell to a lab-only
     kubeconfig, and every grading script pins the context explicitly. No exercise can touch
     another cluster.
   - **Nothing permanent on the machine.** Two binaries in `~/bin`, one kind cluster, some

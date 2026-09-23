@@ -1,5 +1,7 @@
 # 23 - The debugging playbook
 
+*Module 08 - Mastery, lesson 1 of 3. Exercise 23 of 25.*
+
 Everything so far has been "how it works". This is "what to do at 2am". The good news is
 that Kubernetes failures are extremely repetitive: a handful of symptoms cover almost
 everything, and each has a short, mechanical path to the cause.

@@ -1,5 +1,7 @@
 # 24 - CRDs, controllers and operators
 
+*Module 08 - Mastery, lesson 2 of 3. Exercise 24 of 25.*
+
 Every object you have used - Pod, Deployment, Ingress - is a record in etcd plus a
 controller that reconciles it. **You can add your own kinds**, and once you do, your domain
 objects get the same API, the same RBAC, the same `kubectl get`, the same watch semantics
@@ -114,6 +116,19 @@ In namespace `lesson-24`:
        spec: { replicas: 99 }
        EOF
 
+   PowerShell has no heredoc; the equivalent is a here-string, and it is the same idea -
+   YAML on stdin, no temporary file:
+
+       @'
+       apiVersion: k8slab.dev/v1alpha1
+       kind: Greeting
+       metadata: { name: bad, namespace: lesson-24 }
+       spec: { replicas: 99 }
+       '@ | kubectl -n lesson-24 apply -f -
+
+   The closing `'@` has to sit at the very start of its line with nothing in front of it.
+   Single quotes mean literal, like `<<'EOF'`; `@"` ... `"@` would expand `$variables`.
+
    Rejected: `replicas` above maximum, and `message` is required. The API server enforced
    your rules with no code on your side.
 
@@ -169,6 +184,10 @@ In namespace `lesson-24`:
        spec: { message: "delete me" }
        EOF
        bash lab/solutions/24/controller.sh --once
+
+   (In PowerShell, the same here-string form as above. The controller itself is a bash
+   script - run it with Git Bash: `& "C:\Program Files\Git\bin\bash.exe"
+   lab/solutions/24/controller.sh --once`, not the `bash` on your PATH, which is WSL.)
        kubectl -n lesson-24 get cm | grep temporary
        kubectl -n lesson-24 delete greeting temporary
        kubectl -n lesson-24 get cm | grep temporary || echo "gone - collected via ownerReferences"

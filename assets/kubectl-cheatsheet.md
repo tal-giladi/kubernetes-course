@@ -9,6 +9,7 @@ secret ns sa pvc pv ing netpol hpa pdb`.
     kubectl config current-context               # before anything destructive
     kubectl config use-context kind-k8s-lab
     source lab/env.sh                            # isolate this shell to the lab cluster
+    . .\lab\env.ps1                              # the same, in PowerShell (note the dot)
 
     kubectl api-resources                        # every kind, group, short name, namespaced?
     kubectl api-versions

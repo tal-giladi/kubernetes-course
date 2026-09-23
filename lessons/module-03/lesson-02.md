@@ -1,5 +1,7 @@
 # 09 - DNS, headless Services and kube-proxy
 
+*Module 03 - Networking, lesson 2 of 3. Exercise 09 of 25.*
+
 Lesson 08 gave you a stable IP. This lesson is about the two things that make it usable: a
 name that resolves to it, and the kernel machinery that makes packets to a fake IP arrive
 at a real Pod.

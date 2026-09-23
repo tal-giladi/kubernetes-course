@@ -1,5 +1,7 @@
 # 11 - ConfigMaps and Secrets
 
+*Module 04 - Configuration and state, lesson 1 of 3. Exercise 11 of 25.*
+
 Configuration does not belong in your image. If it did, "same artifact, three
 environments" would be impossible and every config change would be a rebuild. Kubernetes
 gives you two objects for it, which are the *same object* with different social rules:

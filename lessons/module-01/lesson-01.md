@@ -1,5 +1,7 @@
 # 01 - The mental model: from Docker to Kubernetes
 
+*Module 01 - Foundations, lesson 1 of 3. Exercise 01 of 25.*
+
 You know Docker. So let's define Kubernetes in your terms:
 
     docker run             ->  you tell one machine to start one container, now.
@@ -13,6 +15,79 @@ you do with `docker run`. You write down a wish, and a controller makes it true 
 keeps making it true after a node dies at 3am.
 
 Everything else in this course is a variation on that sentence.
+
+## The words, before the commands
+
+Five nouns carry the entire course. Nothing below is jargon you can skip - every later
+lesson is one of these five getting more detailed.
+
+**Cluster** - the whole thing: a set of machines that Kubernetes manages as one computer.
+You do not address the machines. You talk to the cluster, and it decides where things go.
+
+**Node** - one machine in the cluster. A VM, a bare-metal server, or - in this course - a
+Docker container pretending to be a machine. A node contributes CPU, memory and disk to the
+pool, and runs an agent (the kubelet) that starts containers when it is told to. Nodes are
+deliberately boring and interchangeable: the whole design assumes one can die at any moment,
+which is why you never care *which* node your application landed on. There are two kinds:
+
+  - a **control-plane node** runs the cluster's brain - the components listed in the next
+    section;
+  - a **worker node** runs your applications. Ours has two of them.
+
+**Pod** - the smallest thing Kubernetes will run. A Pod is a wrapper around **one or more
+containers that are scheduled together, onto one node, and share a network identity**: one
+IP address for the Pod, so the containers inside reach each other over `localhost`, and
+shared directories if they want them. Nearly every Pod you will ever write has exactly one
+container - so for now, read "Pod" as "your container, plus the paperwork Kubernetes needs".
+The wrapper exists because occasionally one container genuinely cannot do the job alone: a
+log shipper or a proxy that has to live and die with the app and see its filesystem. That
+sidecar goes in the same Pod.
+
+Two things about Pods that catch everyone arriving from Docker:
+
+  - a Pod is **disposable**. It is never repaired, never moved, never restarted elsewhere.
+    If its node dies, that Pod is gone, and a *different* Pod with a *new* name and a *new*
+    IP is created somewhere else. Anything that must survive cannot live inside it.
+  - you almost never write a Pod by hand. You write a **Deployment**, and its controller
+    creates and replaces Pods for you. Lesson 03 has you write a bare Pod exactly once, so
+    that you can watch it *not* come back.
+
+**Container** - exactly what you already know. Same image, same registry, same layers. The
+container is the only part of this stack that has not changed since Docker.
+
+**Object** - anything Kubernetes stores and reconciles: a Pod, a Deployment, a Service, a
+Namespace. You create objects by describing them in YAML and sending them to the API server.
+They all share one shape, described two sections down.
+
+So, top to bottom:
+
+    cluster  ......... everything Kubernetes manages, as one computer
+      |
+      +-- node  ...... one machine (here: a Docker container on your laptop)
+      |    |
+      |    +-- pod  .. has its own IP, always lands on exactly one node
+      |    |    |
+      |    |    +-- container   <- your image
+      |    |    +-- container   <- optional sidecar: same IP, same localhost
+      |    |
+      |    +-- pod
+      |
+      +-- node
+      +-- node
+
+And the same picture in the vocabulary you arrived with:
+
+    docker run nginx                  ->  a Pod (created for you by a Deployment)
+    docker run -d --restart=always    ->  a Deployment - a controller keeps it running
+    the same container, three times   ->  replicas: 3 in one Deployment
+    -p 8080:80 / a container name     ->  a Service: one stable name and IP for those Pods
+    a named volume                    ->  a PersistentVolumeClaim
+    an .env file                      ->  a ConfigMap (or a Secret)
+    docker-compose.yml                ->  a folder of YAML, or a Helm chart (lesson 21)
+    docker ps                         ->  kubectl get pods
+    docker logs / exec / inspect      ->  kubectl logs / exec / describe
+
+The right-hand column is the syllabus. You now know what every word in it means.
 
 ## Anatomy of the cluster you just built
 
@@ -94,13 +169,21 @@ production cluster.
 So this course does not rely on your discipline. Point your shell at a kubeconfig that
 contains **only** the lab cluster:
 
-    source lab/env.sh
+    source lab/env.sh          # bash, zsh, Git Bash
+    . .\lab\env.ps1            # PowerShell - the leading dot is required
 
 It writes `lab/.kubeconfig` (kind's own export - one cluster, one context), sets
 `KUBECONFIG` for **this shell only**, and prints the context so you can see it. Your real
 kubeconfig is never modified, and a new terminal is back to normal. Do this at the start of
-every lab session. The grader (`bash lab/lab.sh check NN`) pins the context on every call
-regardless, so it can never grade - or damage - the wrong cluster.
+every lab session. The grader (`bash lab/lab.sh check NN`, or `.\lab\lab.ps1 check NN`)
+pins the context on every call regardless, so it can never grade - or damage - the wrong
+cluster.
+
+PowerShell has no `source` command, which is why there are two files. Its equivalent is
+that lonely leading dot: `. .\lab\env.ps1` runs the script *in your shell*, so the
+`KUBECONFIG` it sets survives. Run it without the dot and it works perfectly inside a child
+process that then exits, taking the setting with it - the script tells you so rather than
+letting you find out three commands later.
 
 ## Namespaces
 

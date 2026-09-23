@@ -1,5 +1,7 @@
 # 16 - Scheduling and placement
 
+*Module 05 - Reliability, lesson 3 of 4. Exercise 16 of 25.*
+
 By default the scheduler puts Pods wherever they fit and you should mostly let it. But
 "wherever" is wrong when a workload needs specific hardware, when two replicas of the same
 service must not share a failure domain, or when a node is reserved for something else.

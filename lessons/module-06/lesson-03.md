@@ -1,5 +1,7 @@
 # 20 - SecurityContext, Pod Security Admission and NetworkPolicy
 
+*Module 06 - Security and multi-tenancy, lesson 3 of 3. Exercise 20 of 25.*
+
 Three independent controls, three different attackers. `securityContext` limits what a
 container can do *on its node*. Pod Security Admission stops non-compliant Pods from being
 created at all. NetworkPolicy limits what a compromised Pod can *reach*. You want all

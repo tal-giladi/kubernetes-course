@@ -1,5 +1,7 @@
 # 13 - StatefulSets
 
+*Module 04 - Configuration and state, lesson 3 of 3. Exercise 13 of 25.*
+
 A Deployment's Pods are interchangeable: random names, random IPs, one shared claim if
 any. That is exactly wrong for a database replica set, a Kafka broker, or anything where
 "who am I" is part of the protocol. **StatefulSet** is the controller that gives Pods

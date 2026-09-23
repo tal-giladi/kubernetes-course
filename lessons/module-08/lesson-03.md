@@ -1,5 +1,7 @@
 # 25 - Capstone: ship a multi-tier application
 
+*Module 08 - Mastery, lesson 3 of 3. Exercise 25 of 25.*
+
 No new concepts. This is the exam: build one application that uses everything, in one
 namespace, from scratch. Give yourself a couple of hours and try to write it without
 looking back at the earlier lessons - then look, and see what you forgot. What you forget
@@ -108,7 +110,8 @@ run this". Most of the answers are not more YAML.
   including PSA rejections - before anything runs.
 - Under `restricted`, **every** Pod needs the securityContext, including the StatefulSet
   and any debug Pod you launch.
-- Mint the TLS Secret the same way as lesson 10, with `//CN=` for Git Bash.
+- Mint the TLS Secret the same way as lesson 10: `MSYS_NO_PATHCONV=1` (or `//CN=`) in Git
+  Bash, plain `-subj "/CN=..."` in PowerShell.
 - If the Ingress returns 503, the Service has no endpoints. If it returns 404, the host or
   path did not match. If it times out, look at the NetworkPolicy.
 - The `ingress-nginx` namespace has the label `kubernetes.io/metadata.name: ingress-nginx`,

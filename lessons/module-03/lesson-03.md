@@ -1,5 +1,7 @@
 # 10 - Ingress and TLS
 
+*Module 03 - Networking, lesson 3 of 3. Exercise 10 of 25.*
+
 A Service of type NodePort gets traffic into the cluster on an ugly high port, one port
 per service, with no hostnames, no paths and no TLS. That does not scale past the first
 demo. **Ingress** is the L7 answer: one entry point, many hostnames and paths, TLS
@@ -123,6 +125,14 @@ testing over plain HTTP.
    openssl rejects it. You will hit this again with any tool that takes `/`-prefixed
    arguments.
 
+   In PowerShell there is no such rewriting, so drop the prefix and use backticks for the
+   line breaks:
+
+       openssl req -x509 -nodes -newkey rsa:2048 -days 365 `
+         -keyout tls.key -out tls.crt `
+         -subj "/CN=shop.localtest.me" -addext "subjectAltName=DNS:shop.localtest.me"
+       kubectl -n lesson-10 create secret tls shop-tls --cert=tls.crt --key=tls.key
+
 4. Create an Ingress `shop` with `ingressClassName: nginx`, host `shop.localtest.me`,
    TLS via `shop-tls`, and two Prefix paths: `/` -> `web`, `/api` -> `api`.
 
@@ -135,6 +145,10 @@ testing over plain HTTP.
        curl -sk -H "Host: shop.localtest.me" https://localhost/
 
    The first says `web`, the second says `api`, the third is the same over TLS.
+
+   On Windows PowerShell 5.1, write `curl.exe` - there `curl` is an alias for
+   `Invoke-WebRequest`, which does not understand `-s`, `-H` or `-k`. PowerShell 7 removed
+   the alias, so `curl` is the real binary again.
 
 6. Now poke at the failure modes, because these are the ones you will actually hit:
 

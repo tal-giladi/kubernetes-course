@@ -17,6 +17,7 @@ LAB="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$LAB/.." && pwd)"
 PROGRESS="$LAB/.progress"
 MANIFEST="$LAB/manifest.tsv"
+MODULES="$LAB/modules.tsv"
 CLUSTER=k8s-lab
 CTX="kind-$CLUSTER"
 touch "$PROGRESS"
@@ -31,6 +32,8 @@ pad() { printf "%02d" "$((10#$1))"; }
 
 # field <NN> <col>   -> column from manifest.tsv (1=nn 2=module 3=lesson 4=title)
 field() { awk -F'\t' -v n="$1" -v c="$2" '$1==n {print $c}' "$MANIFEST"; }
+# module_title <MM> -> the module's subject, so the listing says what a module is about
+module_title() { awk -F'\t' -v n="$1" '$1==n {print $2}' "$MODULES"; }
 lesson_path() {
   local n="$1"
   echo "lessons/module-$(field "$n" 2)/lesson-$(field "$n" 3).md"
@@ -69,7 +72,7 @@ cmd_status() {
     [ -z "${nn:-}" ] && continue
     total=$((total + 1))
     if [ "$mod" != "$lastmod" ]; then
-      printf "\n  Module %s\n" "$mod"
+      printf "\n  Module %s -- %s\n" "$mod" "$(module_title "$mod")"
       lastmod="$mod"
     fi
     local mark="[ ]"

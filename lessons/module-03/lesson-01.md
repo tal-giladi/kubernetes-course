@@ -1,5 +1,7 @@
 # 08 - Services and endpoints
 
+*Module 03 - Networking, lesson 1 of 3. Exercise 08 of 25.*
+
 Pods get IPs. Pods also get deleted constantly - you proved that in lesson 04, where a
 deleted Pod came back with a different name *and* a different address. So a Pod IP is
 never something to write down. A **Service** is the stable name in front of a changing set

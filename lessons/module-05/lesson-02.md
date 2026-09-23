@@ -1,5 +1,7 @@
 # 15 - Resources, QoS and eviction
 
+*Module 05 - Reliability, lesson 2 of 4. Exercise 15 of 25.*
+
 Two numbers per container decide where your Pod runs, what happens when the node is busy,
 and who dies when it runs out of memory. They are the most consequential four lines in a
 Pod spec, and the most commonly left blank.

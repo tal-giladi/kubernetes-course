@@ -1,5 +1,7 @@
 # 07 - DaemonSets, Jobs and CronJobs
 
+*Module 02 - Running workloads, lesson 4 of 4. Exercise 07 of 25.*
+
 A Deployment says "N copies, somewhere". Three other controllers say something different,
 and each is the right answer to a question a Deployment answers badly.
 

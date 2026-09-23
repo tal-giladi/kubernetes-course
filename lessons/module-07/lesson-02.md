@@ -1,5 +1,7 @@
 # 22 - Kustomize
 
+*Module 07 - Packaging and delivery, lesson 2 of 2. Exercise 22 of 25.*
+
 Helm templates YAML. Kustomize **patches** it. There are no `{{ }}`, no template language
 and no runtime: you keep plain, valid, readable Kubernetes manifests as a *base*, and each
 environment is an *overlay* that says what differs. It is built into `kubectl`, so there is

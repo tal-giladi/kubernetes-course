@@ -10,12 +10,13 @@ See [`brief/course-brief.md`](../brief/course-brief.md). In short: you know Dock
 never run Kubernetes, and you own production services.
 
 Required on the machine: Docker, `kubectl`, `kind`, and (from lesson 21) `helm`.
-Setup is one command - `bash lab/lab.sh up`.
+Setup is one command - `bash lab/lab.sh up`, or `.\lab\lab.ps1 up` in PowerShell.
 
 ## Design principles
 
 1. **Every lesson is graded against a live cluster.** No lesson is "done" because you read
-   it. `bash lab/lab.sh check NN` inspects real objects and real traffic.
+   it. `bash lab/lab.sh check NN` (PowerShell: `.\lab\lab.ps1 check NN`) inspects real
+   objects and real traffic.
 2. **Break it on purpose.** Each lesson includes a deliberate failure, because the symptom
    is what you will actually meet - a hanging Service, an `ImagePullBackOff`, an OOMKill, a
    silently dropped packet.
@@ -86,7 +87,8 @@ Setup is one command - `bash lab/lab.sh up`.
 
 ## Assessment
 
-  - **25 graded exercises**, one per lesson, run with `bash lab/lab.sh check NN`.
+  - **25 graded exercises**, one per lesson, run with `bash lab/lab.sh check NN` or
+    `.\lab\lab.ps1 check NN`.
   - **8 quizzes**, one per module, in [`assessments/`](../assessments/) - written to test
     judgement and diagnosis rather than recall. Full answer keys.
   - **The capstone** (lesson 25) is the exam: 38 assertions across security, storage,

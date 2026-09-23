@@ -1,5 +1,7 @@
 # 12 - Volumes, PersistentVolumes, PVCs and StorageClasses
 
+*Module 04 - Configuration and state, lesson 2 of 3. Exercise 12 of 25.*
+
 A container's filesystem dies with the container. A **volume** is storage attached to a
 Pod; how long it lives depends entirely on which kind you pick.
 
