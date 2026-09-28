@@ -1,0 +1,67 @@
+# Multiple-choice version of the quiz in module-06-quiz.md (question N = question N there).
+# The lesson's model answer is shown as the explanation. `source` fingerprints the original
+# question + answer; if the lesson changes, the site flags the question for review.
+- source: cb9522b8ceab
+  question: "A namespace has a ResourceQuota with `requests.cpu: 2`. A Deployment with no `resources` block exists, but no Pods appear. Why, and which command shows it?"
+  options:
+    - The quota rejected the Deployment; `kubectl describe deploy` shows why
+    - The scheduler waits for quota; `kubectl describe pod` shows `FailedScheduling`
+    - The Pods were created then evicted; `kubectl logs` shows the reason
+    - The quota makes CPU requests mandatory, so Pod creation is rejected; `kubectl describe rs <name>` shows `FailedCreate`
+  correct: 3
+- source: 6b6874abb356
+  question: What is the difference between a ResourceQuota and a LimitRange?
+  options:
+    - Quota caps the namespace total; LimitRange sets per-container defaults and min/max, so without it a requests quota rejects Pods that omit requests
+    - Quota is per container; LimitRange caps the namespace total, and they are interchangeable
+    - Quota applies at scheduling; LimitRange applies at runtime through cgroups
+    - Quota caps the namespace total; LimitRange caps each node's total
+  correct: 0
+- source: 2ebec12a79a1
+  question: For 'read-only access to debug' you grant a Role with `get`, `list`, `watch` on `*` in the namespace. What have you actually given away?
+  options:
+    - Nothing sensitive, since read-only access cannot leak data
+    - Only Secret names, since values need a separate verb
+    - Every Secret in the namespace in full, because `list` returns object contents
+    - Shell access, since `watch` includes `pods/exec`
+  correct: 2
+- source: b8bbac32c249
+  question: What does a RoleBinding that references a ClusterRole grant, and which do you want for 'the web team are admins of their own namespace'?
+  options:
+    - Cluster-wide rights; use a ClusterRoleBinding scoped with a namespace field
+    - The ClusterRole's rights only in the binding's namespace; use a RoleBinding in `web` to the `admin` ClusterRole
+    - Nothing, since a RoleBinding cannot reference a ClusterRole; copy it into a Role
+    - Cluster-wide read and namespace write; use a ClusterRoleBinding
+  correct: 1
+- source: c261f6b65c9c
+  question: A Pod is compromised through an application bug. What decides how much API access the attacker gets, and which setting should most workloads have?
+  options:
+    - "The node's kubelet credentials; set `hostNetwork: false`"
+    - The namespace's ResourceQuota; set strict quotas
+    - "The Pod's ServiceAccount permissions; set `automountServiceAccountToken: false`"
+    - "The Pod's securityContext; set `runAsNonRoot: true`"
+  correct: 2
+- source: e8c88110dcf7
+  question: "To stop privileged containers in a namespace, which is enforcement: each Pod's `securityContext` or Pod Security Admission?"
+  options:
+    - securityContext, because the kubelet checks it; PSA is advisory
+    - Both equally, applied at different times
+    - Neither; only an admission webhook can enforce
+    - PSA, because it rejects non-compliant Pods at the API server; securityContext relies on each author remembering
+  correct: 3
+- source: e67f4672ed04
+  question: After a default-deny ingress policy plus an allow rule for `role=client`, the `role=other` Pod's request hangs 30 seconds and times out, with nothing logged. Is it a bug, and what would a *refused* connection mean?
+  options:
+    - "Not a bug: denied packets are dropped, so it times out silently; refused would mean the packets arrived and nothing was listening"
+    - "A CNI bug: NetworkPolicy should refuse connections immediately"
+    - "Not a bug: kube-proxy logs the rejection; refused would mean a policy"
+    - "Not a bug: the Pod is still starting; refused would mean the policy blocked it"
+  correct: 0
+- source: 3a84dc6356a5
+  question: In a NetworkPolicy, what is the difference between `from:` with two items (`- namespaceSelector…` and `- podSelector…`) and one item holding both selectors?
+  options:
+    - "None: the hyphen is only formatting, and both forms mean AND"
+    - Two items mean OR, so any Pod in a `team=web` namespace or any `app=api` Pod here
+    - Two items mean AND, so only `app=api` Pods in a `team=web` namespace
+    - The two-item form is invalid YAML and the API server rejects it
+  correct: 1

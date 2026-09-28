@@ -1,0 +1,75 @@
+# Multiple-choice version of the quiz in module-05-quiz.md (question N = question N there).
+# The lesson's model answer is shown as the explanation. `source` fingerprints the original
+# question + answer; if the lesson changes, the site flags the question for review.
+- source: 598dd174d082
+  question: A liveness probe calls `/health`, which checks the database. The database has a 90-second blip. What happens?
+  options:
+    - Only Pods with active database connections restart, which is what you want
+    - Pods are marked NotReady until the database returns, which is harmless
+    - "Every Pod's liveness fails at once, all restart cold and hammer the database: a total outage instead of 90 seconds of errors"
+    - The kubelet ignores liveness failures caused by dependencies
+  correct: 2
+- source: 69fb79f1cf6e
+  question: "An app takes 60 seconds to warm up and someone sets `livenessProbe.initialDelaySeconds: 90`. What is wrong, and what should they use?"
+  options:
+    - Hangs go undetected for 90s and slow boots get killed in a loop; use a `startupProbe` with a generous `failureThreshold`
+    - "Nothing: `initialDelaySeconds` is the recommended way to handle slow starts"
+    - It should equal the warm-up time; set it to 60
+    - It delays readiness too; move the delay to the readiness probe
+  correct: 0
+- source: e79c059de9f1
+  question: "Pod A is `1/1 Running` with `RESTARTS: 14`. Pod B is `0/1 Running` with `RESTARTS: 0`. Which probe is involved in each, and which receives traffic?"
+  options:
+    - "A: failing readiness, no traffic; B: failing liveness, receives traffic"
+    - Both fail liveness, and neither receives traffic
+    - "A: failing startup probe, no traffic; B: failing readiness, receives traffic"
+    - "A: failing liveness (or crashing) but Ready now, so it receives traffic; B: failing readiness, no traffic"
+  correct: 3
+- source: d71fa6bab4d9
+  question: "Why can `timeoutSeconds: 1` on a liveness probe take down a healthy service under load?"
+  options:
+    - The kubelet probes so often that it uses all the node's CPU
+    - Under load the health check takes over 1s, the container is killed, its traffic slows the others, and they get killed in turn
+    - Timed-out probes only mark the Pod NotReady, so traffic drops to zero
+    - The kubelet retries timed-out probes forever and never serves traffic
+  correct: 1
+- source: 708ef905628a
+  question: "A container has `requests.memory: 256Mi`, `limits.memory: 512Mi` and no CPU limit. What QoS class is it, and when is it killed or evicted?"
+  options:
+    - Guaranteed; killed only when the node runs out of memory
+    - BestEffort; the kernel kills it above 256Mi
+    - Burstable; the kernel OOM-kills it above 512Mi; the kubelet evicts it only under node memory pressure
+    - Burstable; the kernel kills it above 256Mi and the kubelet evicts it first
+  correct: 2
+- source: 838bc1e04735
+  question: A node shows 95% CPU requested and 4% CPU used, and new Pods won't schedule. What is going on?
+  options:
+    - The scheduler reads stale metrics; restart metrics-server
+    - The node is overcommitted; add CPU limits to all Pods
+    - Scheduling uses a daily average of usage; wait for it to update
+    - Scheduling reserves by requests, not usage, so it works correctly; right-size requests from measured usage
+  correct: 3
+- source: "055891567072"
+  question: You set required `podAntiAffinity` on hostname and scale to 5 replicas on a 3-node cluster. What happens, and what should you have used?
+  options:
+    - Three schedule and two stay Pending; use `topologySpreadConstraints` with `ScheduleAnyway`, or preferred anti-affinity
+    - All five schedule, with two nodes running two each
+    - None schedule until a fourth node exists
+    - "Three schedule and two stay Pending; add `maxSkew: 2` to the anti-affinity rule"
+  correct: 0
+- source: 0f891d621a4a
+  question: "An HPA shows `TARGETS: <unknown>/70%` and never scales. What are the two causes, in the order you check them?"
+  options:
+    - The target is too high, then the Deployment has too few replicas
+    - metrics-server is missing or unhealthy, then the container has no CPU request
+    - The HPA lacks RBAC, then the Deployment has no readiness probe
+    - The container has no CPU limit, then metrics-server is missing
+  correct: 1
+- source: 631126624bf2
+  question: "A node drain hangs on a disruption budget. Service X has 6 replicas and `minAvailable: 50%`; service Y has 1 replica and `minAvailable: 1`. Which blocks, and what is the fix?"
+  options:
+    - "X, because 50% of 6 cannot be evicted; set `minAvailable: 3`"
+    - Both, because any PDB blocks a drain
+    - "Y; run at least 2 replicas or use `maxUnavailable: 1`"
+    - Neither; drains ignore PDBs and the message is a warning
+  correct: 2

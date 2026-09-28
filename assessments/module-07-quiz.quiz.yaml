@@ -1,0 +1,59 @@
+# Multiple-choice version of the quiz in module-07-quiz.md (question N = question N there).
+# The lesson's model answer is shown as the explanation. `source` fingerprints the original
+# question + answer; if the lesson changes, the site flags the question for review.
+- source: d4fbe6f0ff92
+  question: What is the difference between `version` and `appVersion` in `Chart.yaml`?
+  options:
+    - "`version` is the app's version; `appVersion` is the chart's API version"
+    - They must always match and are bumped together
+    - "`version` is the chart's own version (templates, defaults); `appVersion` is the version of the software it deploys"
+    - "`version` is the minimum Helm version; `appVersion` is the chart's version"
+  correct: 2
+- source: aa62a304d49a
+  question: A teammate debugs a chart by running `helm install` repeatedly. Which two commands are better, and what does each catch?
+  options:
+    - "`helm template` renders locally (template and YAML errors); `helm install --dry-run --debug` also checks with the API server (schema, admission)"
+    - "`helm upgrade --force` shows errors; `helm rollback` catches schema problems"
+    - "`helm status` renders templates; `helm get values` catches admission rejections"
+    - "`helm template` checks with the API server; `helm lint` renders against a live cluster"
+  correct: 0
+- source: da9d02e32d34
+  question: "`helm rollback shop 1` succeeds and `helm history shop` shows four revisions. Why aren't you *at* revision 1?"
+  options:
+    - Rollback deleted revisions 2 and 3, and history shows a stale cache
+    - Revision 4 is a backup Helm makes before every rollback
+    - The rollback partly failed, so Helm created revision 4 to retry
+    - Rollback re-applies revision 1's manifest as a new revision 4; history records what you did, not what you had
+  correct: 3
+- source: 5af94067e8f6
+  question: Someone fixed an incident with `kubectl edit deploy web` on a Helm-managed release. What happens at the next `helm upgrade`?
+  options:
+    - Helm always reverts every manual edit
+    - "It depends: the three-way merge keeps fields the chart doesn't mention and reverts ones it does, so put fixes in the chart"
+    - Helm always keeps manual edits
+    - The upgrade fails with a conflict until you run `helm rollback`
+  correct: 1
+- source: 0b48edb7f0d5
+  question: What does Kustomize's `configMapGenerator` name hash buy you?
+  options:
+    - It deduplicates ConfigMaps across namespaces, saving quota
+    - It encrypts the ConfigMap so it can hold secrets
+    - A config change renames the ConfigMap, changing the Pod template and triggering a rollout, so Pods never keep stale env vars
+    - It pins the ConfigMap so Pods keep old config during rollbacks
+  correct: 2
+- source: d97d85dec8ae
+  question: "You add `commonLabels: {env: prod}` to an overlay and `kubectl apply -k` fails with `field is immutable`. Why, and what is the fix?"
+  options:
+    - Labels can't change on existing objects; delete and recreate them
+    - "`env` is a reserved label key; rename it"
+    - "`apply -k` doesn't support overlays; pipe `kubectl kustomize` to `kubectl replace`"
+    - "`commonLabels` also changes the immutable `spec.selector.matchLabels`; use `labels:` with `includeSelectors: false`"
+  correct: 3
+- source: 876b91659631
+  question: You ship an internal service to four environments and run a third-party database that publishes a Helm chart. What do you use for each?
+  options:
+    - Kustomize overlays for the internal service, Helm for the vendor chart, patching `helm template` output with an overlay when needed
+    - Helm for both, since Kustomize can't handle several environments
+    - Kustomize for both, rewriting the vendor chart as plain YAML
+    - Helm for the internal service, Kustomize for the vendor database
+  correct: 0

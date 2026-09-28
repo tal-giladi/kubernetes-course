@@ -1,0 +1,67 @@
+# Multiple-choice version of the quiz in module-03-quiz.md (question N = question N there).
+# The lesson's model answer is shown as the explanation. `source` fingerprints the original
+# question + answer; if the lesson changes, the site flags the question for review.
+- source: db9ff455f4c2
+  question: "`curl http://api:8080` from another Pod hangs and times out, while the `api` Pods are `Running`. What do you run first, what do you read, and what are the two possible causes?"
+  options:
+    - "`kubectl logs` on the api Pods; the last error; a crash or a wrong port"
+    - "`kubectl describe svc api`; the `Endpoints:` line; the selector doesn't match the Pods, or the Pods aren't Ready"
+    - "`kubectl get nodes`; the STATUS column; a NotReady node or a full disk"
+    - "`kubectl describe svc api`; the `Type:` line; ClusterIP instead of NodePort, or no Ingress"
+  correct: 1
+- source: db4821925231
+  question: A gRPC service has 10 replicas behind a ClusterIP Service. One Pod is at 100% CPU and nine are idle. Why, and what fixes it?
+  options:
+    - "The Service defaults to `sessionAffinity: ClientIP`; set it to `None`"
+    - The busy Pod became Ready first; lower `initialDelaySeconds` on the others
+    - kube-proxy hashes each request by client IP; use a NodePort Service instead
+    - kube-proxy balances connections and gRPC keeps one HTTP/2 connection; use a headless Service with client-side balancing, or an L7 proxy
+  correct: 3
+- source: 5a6f3a8ffbab
+  question: "What is the difference between `targetPort: 8080` and `targetPort: http` in a Service?"
+  options:
+    - Same port today, but `http` follows the container's `ports[].name`, so a port change is made only in the container spec
+    - "`http` makes the Service speak HTTP instead of plain TCP"
+    - "`http` means container port 80, so they differ unless the app listens on 80"
+    - The named form works only for headless Services
+  correct: 0
+- source: 83e45d1c7eea
+  question: A Pod resolves `api` instantly but `api.github.com` is slow. What in `/etc/resolv.conf` explains it, and how do you avoid the cost?
+  options:
+    - "`nameserver` points at CoreDNS, which caches only cluster names; use a public resolver"
+    - The `search` list is too long; delete `/etc/resolv.conf` from the image
+    - "`options ndots:5` tries every search domain first for names with fewer than five dots; use a trailing dot or lower `ndots` in `dnsConfig`"
+    - "`options timeout:5` waits five seconds per external lookup; lower the timeout"
+  correct: 2
+- source: a491c5a2c93f
+  question: You create a `LoadBalancer` Service on your kind cluster, and `EXTERNAL-IP` stays `<pending>` for ten minutes. What is wrong?
+  options:
+    - The cloud controller is crashing; restart it in `kube-system`
+    - "Nothing: kind has no cloud provider, so `<pending>` is correct; use the NodePort or install MetalLB"
+    - The Service has no endpoints; fix its selector
+    - "kind needs `externalTrafficPolicy: Local` for load balancers"
+  correct: 1
+- source: aa66f3c8f425
+  question: You apply an Ingress and get 404 from nginx for every request. You fix that and start getting 503. What was each problem?
+  options:
+    - "404: the backend Pods return not-found; 503: the ingress controller is overloaded"
+    - "404: the backend Service has no endpoints; 503: no Ingress rule matched"
+    - "404: the TLS certificate is missing; 503: the Service must be a NodePort"
+    - "404: no Ingress rule matched the host or path; 503: a rule matched but the backend Service has no endpoints"
+  correct: 3
+- source: 1160c0e39224
+  question: "A Service has `sessionAffinity: ClientIP` and `externalTrafficPolicy: Local`. What does each do, and what failure does `Local` introduce?"
+  options:
+    - "`ClientIP` pins a client IP to one Pod; `Local` keeps the real client IP, but a node with no Pod of the Service blackholes traffic"
+    - "`ClientIP` preserves the real client IP; `Local` routes only to control-plane Pods, which overload"
+    - "`ClientIP` pins a client to one node; `Local` disables load balancing so one Pod gets everything"
+    - "`ClientIP` pins a client IP to one Pod; `Local` SNATs external traffic, so the app loses the client IP"
+  correct: 0
+- source: 5c81fb58c44a
+  question: Your team wants each Pod of a database StatefulSet addressable individually. Which Service type, what does DNS return, and what does it not do for you?
+  options:
+    - A NodePort Service; one port per Pod; it does no load balancing
+    - A ClusterIP Service with session affinity; one virtual IP; it does no leader election
+    - A headless Service; one A record per Ready Pod plus names like `db-0.db…`; no load balancing and no idea which replica is primary
+    - A headless Service; the primary's IP first; it does no failover
+  correct: 2

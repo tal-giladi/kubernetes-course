@@ -1,0 +1,59 @@
+# Multiple-choice version of the quiz in module-01-quiz.md (question N = question N there).
+# The lesson's model answer is shown as the explanation. `source` fingerprints the original
+# question + answer; if the lesson changes, the site flags the question for review.
+- source: c2d6f7cf0333
+  question: You run `kubectl delete pod web` and the Pod disappears. Ten seconds later a Pod called `web-7d9f8c6b45-x2ktq` is running. What happened?
+  options:
+    - The kubelet restarted the same Pod in place, keeping its IP and container filesystem
+    - The ReplicaSet saw `status` (2 Pods) below `spec.replicas` (3) and created a new Pod from its template
+    - The scheduler moved the deleted Pod to another node and gave it a new name
+    - The API server restored the Pod object from etcd, so it is the same Pod as before
+  correct: 1
+- source: 73805d334f46
+  question: Which component actually starts a container?
+  options:
+    - The scheduler, right after it picks a node
+    - The controller manager, when it creates the Pod object
+    - The API server, after it validates and stores the Pod
+    - The kubelet on the node the Pod was assigned to
+  correct: 3
+- source: 30943ee2a925
+  question: A colleague says 'etcd is where the logs go'. What does etcd actually hold?
+  options:
+    - "The cluster's desired and observed state: every object you can `kubectl get`"
+    - Container logs, collected from every node by the runtime
+    - Cached container image layers for the kubelets
+    - Only desired state; observed status lives in kubelet memory
+  correct: 0
+- source: 0bf9f4e07b3d
+  question: Your kubeconfig lists `kind-k8s-lab` and `prod-aks`, and the current context (`*`) is `prod-aks`. You run `kubectl delete namespace lesson-03`. What happens, and what makes this mistake impossible rather than unlikely?
+  options:
+    - It fails, because kubectl asks for confirmation when several contexts exist
+    - It deletes `lesson-03` in the kind cluster, because kubectl prefers local clusters
+    - It deletes `lesson-03` in prod-aks; point `KUBECONFIG` at a lab-only file, or pass `--context kind-k8s-lab` on every command
+    - It deletes `lesson-03` in both clusters; delete namespaces by UID instead of by name
+  correct: 2
+- source: 4e645f437d86
+  question: "`kubectl get pods -n kube-system` shows `kube-apiserver-k8s-lab-control-plane` as a Pod. But the API server is what creates Pods. How did that Pod get created?"
+  options:
+    - kubeadm created it through the API server during a temporary bootstrap mode
+    - "It is a static Pod: the kubelet starts it from a manifest on disk, then creates a read-only mirror object"
+    - The controller manager creates it from a Deployment in `kube-system`
+    - The scheduler writes it directly into etcd before the API server starts
+  correct: 1
+- source: debfd20aeae7
+  question: Which list contains only fields written by a controller rather than by you?
+  options:
+    - "`spec.replicas`, `status.podIP`, `spec.nodeName`"
+    - "`status.readyReplicas`, `metadata.labels`, `status.podIP`"
+    - "`status.readyReplicas`, `spec.replicas`, `metadata.labels`"
+    - "`status.readyReplicas`, `status.podIP`, `spec.nodeName`"
+  correct: 3
+- source: 9d9537a6d744
+  question: Your Pod is `Pending`. Which single command tells you which cause it is, and what do you read?
+  options:
+    - "`kubectl describe pod <name>`, the `FailedScheduling` event at the bottom"
+    - "`kubectl logs <name>`, the last error line"
+    - "`kubectl get nodes`, the STATUS column"
+    - "`kubectl top pod <name>`, the CPU and memory usage"
+  correct: 0

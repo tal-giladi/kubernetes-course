@@ -1,0 +1,75 @@
+# Multiple-choice version of the quiz in module-08-quiz.md (question N = question N there).
+# The lesson's model answer is shown as the explanation. `source` fingerprints the original
+# question + answer; if the lesson changes, the site flags the question for review.
+- source: e84dbf054663
+  question: Which pairing of Pod status, likely cause and next command is correct?
+  options:
+    - "`CrashLoopBackOff`: a failing readiness probe; curl the probe path"
+    - "`CreateContainerConfigError`: a referenced ConfigMap or Secret key is missing; `kubectl describe pod` names it"
+    - "`Running 0/1`: the process keeps exiting; `kubectl logs --previous`"
+    - "`ImagePullBackOff`: no node has enough memory; read `FailedScheduling`"
+  correct: 1
+- source: 7c23ccd5f081
+  question: A container's `describe` shows exit code 137. What are the two causes, and how do you tell them apart?
+  options:
+    - SIGTERM from a rollout or a drain, told apart by the exit code
+    - A segfault or a missing library, told apart by `--previous` logs
+    - "SIGKILL from an OOM kill (`Reason: OOMKilled`) or a failed liveness probe (a `Liveness probe failed` event)"
+    - SIGKILL, always an OOM kill, confirmed by `kubectl top pod`
+  correct: 2
+- source: 358273da1fc4
+  question: Why is `kubectl logs POD --previous` often more useful than `kubectl logs POD`?
+  options:
+    - It shows the logs of every container in the Pod
+    - It shows logs from before the last rollout
+    - It adds the kubelet's logs for the Pod
+    - In a crash loop the current container just started; `--previous` shows the instance that died
+  correct: 3
+- source: 046b2a7aa847
+  question: "Your image is distroless: no shell, no tools. Without rebuilding or restarting, how do you get a shell that sees the container's processes and network?"
+  options:
+    - "`kubectl debug POD -it --image=busybox --target=<container>`, an ephemeral container sharing its namespaces"
+    - "`kubectl exec -it POD -- sh`, which brings its own shell"
+    - "`kubectl attach POD`, which opens a shell in the container"
+    - "`kubectl cp` a busybox binary in, then `kubectl exec` it"
+  correct: 0
+- source: d758cb80bf0d
+  question: Ten unrelated services start failing at once. Which three checks do you run before looking at any of them?
+  options:
+    - Each service's logs, probes and resource limits
+    - Node health, kube-system Pods such as CoreDNS and kube-proxy, and cluster events plus control-plane `/readyz`
+    - The Ingress controller, TLS certificates and the registrar's DNS
+    - "`helm list`, `kubectl get crd` and the image tags"
+  correct: 1
+- source: 5725f63a150a
+  question: You apply a CRD and create three custom resources. Nothing happens. Is the CRD broken?
+  options:
+    - "Yes: a CRD must be enabled with `status: enabled`"
+    - "Yes: the API server must restart to load new CRDs"
+    - "No: a CRD is only a schema and an endpoint; nothing acts until a controller watches the resources"
+    - "No: custom resources take a few minutes to reconcile"
+  correct: 2
+- source: 269532b5f6d7
+  question: "You set `spec.retries: 3` on a custom resource; it applies successfully, but `-o yaml` shows no `retries` field. What happened?"
+  options:
+    - kubectl hides unknown fields in YAML output; use `-o json`
+    - The controller removed it after reconciling
+    - Validation rejected it, but kubectl only printed a warning
+    - "The field isn't in the CRD's schema, so the API server silently pruned it: a failure that looks like success"
+  correct: 3
+- source: 6c45719cb1a2
+  question: What does 'level-triggered' mean for a controller, and why is an event-driven one wrong?
+  options:
+    - It reads current desired and actual state and converges them; events can be lost, duplicated or reordered
+    - It reacts to each change event exactly once and in order, which events guarantee
+    - It acts only when a metric crosses a threshold level
+    - It polls at a fixed rate; event-driven is wrong only because it is slower
+  correct: 0
+- source: f7ca34047fb9
+  question: A controller creates a ConfigMap per custom resource. Someone deletes a custom resource. What deletes the ConfigMap?
+  options:
+    - Cleanup code the author wrote in the controller's delete handler
+    - Kubernetes' garbage collector, because the author set `ownerReferences` on the ConfigMap
+    - A finalizer the author put on the ConfigMap
+    - The namespace controller's hourly sweep
+  correct: 1

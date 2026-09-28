@@ -1,0 +1,67 @@
+# Multiple-choice version of the quiz in module-02-quiz.md (question N = question N there).
+# The lesson's model answer is shown as the explanation. `source` fingerprints the original
+# question + answer; if the lesson changes, the site flags the question for review.
+- source: a82fd1afd42c
+  question: You edit a bare ReplicaSet's image from `v1` to `v2`. `kubectl get rs` shows the new image, but the Pods still run the old one. Why?
+  options:
+    - "It is a bug: the ReplicaSet should replace its Pods one by one"
+    - "The kubelet cached the old image and needs `imagePullPolicy: Always`"
+    - A ReplicaSet uses its template only to create missing Pods; a Deployment would create a new ReplicaSet and shift replicas across
+    - The Pods switch to `v2` at the next controller resync, within ten minutes
+  correct: 2
+- source: 34d16f4dc241
+  question: "A Deployment has `replicas: 4`, `maxSurge: 25%`, `maxUnavailable: 25%`. What are the minimum and maximum Pod counts during a rollout, and how do you avoid ever losing capacity?"
+  options:
+    - "Min 3, max 5; set `maxUnavailable: 0`, at the cost of headroom for extra Pods"
+    - "Min 3, max 5; set `maxSurge: 0`, at the cost of a slower rollout"
+    - "Min 4, max 5; set `maxUnavailable: 0`, with no extra cost"
+    - "Min 2, max 6; set `maxSurge: 50%`, at the cost of extra headroom"
+  correct: 0
+- source: 83549da825d6
+  question: You rebuild `myapp:1.4.0` (same tag) and `kubectl apply`. Nothing happens, and even after deleting a Pod one node still runs the old code. What are the two reasons?
+  options:
+    - "`kubectl apply` ignores image fields, and the registry caches tags for an hour"
+    - The Deployment pauses after a rebuild, and old ReplicaSets keep one Pod running
+    - The rollout waits on readiness, and the scheduler prefers nodes with the old Pod
+    - The Pod template did not change, and `IfNotPresent` lets a node reuse its cached image for that tag
+  correct: 3
+- source: 4293f6496ce6
+  question: "`kubectl rollout undo deploy/web` succeeds and the service recovers. Your CI runs `kubectl apply -f k8s/` every ten minutes. What happens next?"
+  options:
+    - "Nothing: `rollout undo` also updates the manifests the CI applies"
+    - The next `apply` redeploys the broken version from git; the fix is a commit to the manifest
+    - "`apply` sees the rollback annotation and skips the Deployment"
+    - The next `apply` fails with a conflict until you run `kubectl replace --force`
+  correct: 1
+- source: b4b6880cbd23
+  question: A rollout has been stuck for fifteen minutes and `kubectl get deploy` shows `3/4 READY`. Is the service down, and what will Kubernetes do?
+  options:
+    - Yes, it is down until the rollout finishes; Kubernetes rolls back after 600 seconds
+    - No, three replicas serve; Kubernetes rolls back automatically after the deadline
+    - No, three replicas serve; after `progressDeadlineSeconds` it reports `ProgressDeadlineExceeded` and does nothing else
+    - Yes, a Deployment serves only when all replicas are Ready; it retries every 10 minutes
+  correct: 2
+- source: 0fef1ba1804f
+  question: You deploy a monitoring agent as a DaemonSet on a 3-node cluster and get 2 Pods. Nothing is `Pending` or failing. What happened?
+  options:
+    - "DaemonSets default to 2 replicas; set `replicas: 3`"
+    - One node is out of CPU; lower the agent's requests
+    - The third Pod is still pulling its image; wait for it
+    - "The control-plane node's `NoSchedule` taint skips it; add a toleration with `operator: Exists`"
+  correct: 3
+- source: 03eb7f9c1633
+  question: "A nightly Job that takes 4 minutes has been 'running' for 12 with no new Pods, and `describe job` shows 3 failures. What is it doing, and would `restartPolicy: OnFailure` have helped debugging?"
+  options:
+    - Backing off with doubling delays; `OnFailure` makes debugging harder because it restarts in place and loses the failed attempt's logs
+    - It is stuck and must be deleted; `OnFailure` would have kept one Pod to inspect
+    - It waits for `activeDeadlineSeconds`; `OnFailure` makes no difference
+    - Backing off with doubling delays; `OnFailure` makes debugging easier because restarts keep every log
+  correct: 0
+- source: fd2c4c2c2c0a
+  question: A CronJob scheduled `*/5 * * * *` runs a report that sometimes takes 8 minutes. What does the cluster look like by evening, and which field prevents it?
+  options:
+    - Late runs are skipped automatically, because the default policy is `Forbid`
+    - "Runs queue and execute one after another; set `parallelism: 1` to keep it so"
+    - Overlapping copies compete for the same rows; set `concurrencyPolicy` to `Forbid` or `Replace`
+    - "Overlapping copies run; set `startingDeadlineSeconds: 300` to stop them"
+  correct: 2

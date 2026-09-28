@@ -1,0 +1,67 @@
+# Multiple-choice version of the quiz in module-04-quiz.md (question N = question N there).
+# The lesson's model answer is shown as the explanation. `source` fingerprints the original
+# question + answer; if the lesson changes, the site flags the question for review.
+- source: dbbf2be3ff3d
+  question: You change a ConfigMap value. One container reads it as an env var, one mounts it as a file, one mounts it with `subPath`. What does each see two minutes later?
+  options:
+    - All three see the new value within a minute
+    - "Env var: new; mounted file: old until restart; `subPath`: new"
+    - "Env var: old; mounted file: old; `subPath`: new within a minute"
+    - "Env var: old; mounted file: new within about a minute; `subPath`: old forever"
+  correct: 3
+- source: 33af12ab9e90
+  question: A reviewer says 'the password is safe, it is in a Secret'. Which of these does *not* protect a Secret?
+  options:
+    - The base64 encoding of the Secret's data
+    - RBAC limits on `get`/`list` of secrets in the namespace
+    - Encryption at rest configured on the API server
+    - Keeping the value outside the cluster (Key Vault, External Secrets)
+  correct: 0
+- source: c6406d8c1c19
+  question: A new PVC sits `Pending` with no Pod using it, and a colleague reports broken storage. What do you tell them?
+  options:
+    - The PVC has no `storageClassName`; set one
+    - "Nothing is broken: `volumeBindingMode: WaitForFirstConsumer` delays provisioning until a Pod using it is scheduled"
+    - The PVC exceeds the namespace quota; request less storage
+    - "Storage is broken: the class should have bound the claim immediately"
+  correct: 1
+- source: b3df5261e8ca
+  question: A Deployment has 3 replicas and one `ReadWriteOnce` PVC. What happens to the replicas, and what should you have used?
+  options:
+    - All three share the volume, since RWO allows one writer per Pod
+    - Only one replica starts and the others crash-loop; use a ReadOnlyMany PVC
+    - Each replica gets its own copy of the volume automatically
+    - Replicas on the node that mounted it start; others stay stuck with a multi-attach error; use a StatefulSet with `volumeClaimTemplates`
+  correct: 3
+- source: a3724bef3169
+  question: "`kubectl delete namespace staging` completes. Two hours later someone asks for the database back. What decided whether it still exists?"
+  options:
+    - "The reclaim policy: with `Delete` (the dynamic default) the disk is gone; with `Retain` the PV survives as `Released`"
+    - The namespace finalizer, which keeps data for 24 hours
+    - The StatefulSet's retention policy, which keeps volumes by default
+    - "Nothing: deleting a namespace never deletes PersistentVolumes"
+  correct: 0
+- source: 2856459cfbf7
+  question: Which of these does a StatefulSet *not* give you?
+  options:
+    - Stable ordinal Pod names that replacements reuse
+    - One PVC per Pod via `volumeClaimTemplates`
+    - Leader election and replication, so `db-0` is the primary
+    - Ordered, one-at-a-time creation and rolling updates
+  correct: 2
+- source: 4fcae8d01c9e
+  question: You scale a StatefulSet from 5 replicas to 2. What happens to `data-db-2`, `data-db-3` and `data-db-4`?
+  options:
+    - They are deleted with the Pods to save cost
+    - They remain, so scaling up re-attaches the data; the risk is forgotten disks that cost money
+    - They are merged into `data-db-0` and `data-db-1`
+    - They remain but are wiped, so scaling up starts empty
+  correct: 1
+- source: 67c82fe26545
+  question: From an Alpine-based Pod `nslookup db-1.db` fails but the fully-qualified name works; from a Debian-based Pod both work. What is going on?
+  options:
+    - Alpine images lack DNS support until you install bind-tools
+    - Alpine caches negative DNS answers until the Pod restarts
+    - Alpine's musl libc applies the `search` list only to names with no dot; use fully-qualified service names
+    - The Pods are in different namespaces from the Service
+  correct: 2
